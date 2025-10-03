@@ -22,7 +22,7 @@ app.use((req, res, next) => {
   const allowedOrigins = [
     "http://localhost:3000",
     "http://localhost:5001",
-    "https://jojo-shop.netlify.app",
+    "https://jojo-shop1.netlify.app/",
   ];
 
   if (allowedOrigins.includes(origin)) {
