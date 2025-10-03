@@ -2,7 +2,6 @@ import path from "path";
 import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
-import cors from "cors"; // Add this import
 dotenv.config();
 import connectDB from "./config/db.js";
 import productRoutes from "./routes/productRoutes.js";
@@ -17,18 +16,39 @@ connectDB();
 
 const app = express();
 
-// CORS Configuration - Add this BEFORE other middleware
-const corsOptions = {
-  origin: [
+// CORS Middleware - MUST be before routes
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  const allowedOrigins = [
     "http://localhost:3000",
     "http://localhost:5001",
-    "https://jojo-shop.netlify.app/", // Replace with your actual Netlify URL
-    "https://jojo-shop-tau.vercel.app/", // Replace with your actual Netlify URL
-  ],
-  credentials: true,
-};
+    "https://jojo-shop.netlify.app",
+  ];
 
-app.use(cors(corsOptions));
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  } else if (!origin) {
+    // Allow requests with no origin (like mobile apps or Postman)
+    res.setHeader("Access-Control-Allow-Origin", "*");
+  }
+
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+  );
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+
+  // Handle preflight requests
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
+  next();
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
